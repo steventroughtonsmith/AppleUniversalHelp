@@ -93,11 +93,18 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	// MARK: -
 	
 	func preparePageViewController(_ viewController:COREHelpPageViewController) {
-		
+			
+		let sidebarItem = UIBarButtonItem(image:UIImage(systemName: "sidebar.leading"), style:.plain, target: self, action: #selector(popToTableOfContents(_:)))
+
 		let backItem = UIBarButtonItem(image:UIImage(systemName: "chevron.left"), style:.plain, target: self, action: #selector(goBack(_:)))
 		let forwardItem = UIBarButtonItem(image:UIImage(systemName: "chevron.right"), style:.plain, target: self, action: #selector(goForward(_:)))
 
 		viewController.navigationItem.leftBarButtonItems = [backItem, forwardItem]
+		
+		if traitCollection.horizontalSizeClass == .compact {
+			viewController.navigationItem.leftBarButtonItems?.insert(sidebarItem, at: 0)
+		}
+		
 		viewController.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismiss(_:)))
 	}
 	
@@ -141,5 +148,9 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	
 	@objc func goForward(_ sender: Any?) {
 		splitPageViewController.webView.goForward()
+	}
+	
+	@objc func popToTableOfContents(_ sender: Any?) {
+		compactRootNavigationController.popToRootViewController(animated: true)
 	}
 }
