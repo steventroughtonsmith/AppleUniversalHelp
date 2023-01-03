@@ -44,7 +44,7 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		
 		rootSplitViewController.primaryBackgroundStyle = .sidebar
 		rootSplitViewController.preferredPrimaryColumnWidth = UIFloat(300)
-				
+		
 		preparePageViewController(splitPageViewController)
 		
 #if targetEnvironment(macCatalyst)
@@ -93,12 +93,12 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	// MARK: -
 	
 	func preparePageViewController(_ viewController:COREHelpPageViewController) {
-			
+		
 		let sidebarItem = UIBarButtonItem(image:UIImage(systemName: "sidebar.leading"), style:.plain, target: self, action: #selector(popToTableOfContents(_:)))
-
+		
 		let backItem = UIBarButtonItem(image:UIImage(systemName: "chevron.left"), style:.plain, target: self, action: #selector(goBack(_:)))
 		let forwardItem = UIBarButtonItem(image:UIImage(systemName: "chevron.right"), style:.plain, target: self, action: #selector(goForward(_:)))
-
+		
 		viewController.navigationItem.leftBarButtonItems = [backItem, forwardItem]
 		
 		if traitCollection.horizontalSizeClass == .compact {
@@ -111,7 +111,7 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	func navigate(to page:HelpPage?) {
 		splitPageViewController.navigate(to: page)
 		view.window?.windowScene?.title = page?.title
-
+		
 		let vc = COREHelpPageViewController()
 		vc.navigate(to: page)
 		preparePageViewController(vc)
@@ -130,24 +130,48 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	open override func responds(to aSelector: Selector!) -> Bool {
 		
 		if aSelector == NSSelectorFromString("goBack:") {
+			if traitCollection.horizontalSizeClass == .compact {
+				if let pageVC = compactRootNavigationController.viewControllers.last as? COREHelpPageViewController {
+					return pageVC.webView.canGoBack
+				}
+			}
+			
 			return splitPageViewController
 				.webView.canGoBack
 		}
 		
 		if aSelector == NSSelectorFromString("goForward:") {
+			if traitCollection.horizontalSizeClass == .compact {
+				if let pageVC = compactRootNavigationController.viewControllers.last as? COREHelpPageViewController {
+					return pageVC.webView.canGoForward
+				}
+			}
+			
 			return splitPageViewController
 				.webView.canGoForward
 		}
 		
 		return super.responds(to: aSelector)
 	}
-
+	
 	@objc func goBack(_ sender: Any?) {
-		splitPageViewController.webView.goBack()
+		if traitCollection.horizontalSizeClass == .compact {
+			guard let pageVC = compactRootNavigationController.viewControllers.last as? COREHelpPageViewController else { return }
+			pageVC.webView.goBack()
+		}
+		else {
+			splitPageViewController.webView.goBack()
+		}
 	}
 	
 	@objc func goForward(_ sender: Any?) {
-		splitPageViewController.webView.goForward()
+		if traitCollection.horizontalSizeClass == .compact {
+			guard let pageVC = compactRootNavigationController.viewControllers.last as? COREHelpPageViewController else { return }
+			pageVC.webView.goForward()
+		}
+		else {
+			splitPageViewController.webView.goForward()
+		}
 	}
 	
 	@objc func popToTableOfContents(_ sender: Any?) {
