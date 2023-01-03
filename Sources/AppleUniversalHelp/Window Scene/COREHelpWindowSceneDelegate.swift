@@ -12,7 +12,7 @@ open class COREHelpWindowSceneDelegate: UIResponder, UIWindowSceneDelegate {
 	public var window: UIWindow?
 	let helpRootController = COREHelpRootViewController()
 	
-	public func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+	open func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
 		guard let scene = scene as? UIWindowScene else { return }
 		
 		window = UIWindow(windowScene: scene)
