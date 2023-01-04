@@ -130,12 +130,13 @@ class COREHelpTableOfContentsViewController: UICollectionViewController, UISearc
 				config.text = item.section?.title
 				
 				
-				
+				config.textProperties.adjustsFontSizeToFitWidth = false
 				cell.contentConfiguration = config
 			}
 			else {
 				var config = UIListContentConfiguration.sidebarCell()
 				
+				config.textProperties.adjustsFontSizeToFitWidth = false
 				config.text = item.page?.title
 				disclosureOptions.isHidden = true
 				cell.contentConfiguration = config
