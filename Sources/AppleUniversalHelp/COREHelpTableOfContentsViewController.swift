@@ -186,6 +186,8 @@ class COREHelpTableOfContentsViewController: UICollectionViewController, UISearc
 		let ip = _indexPathOfDestination(destination)
 		
 		if shouldExpand == true {
+			
+			
 			guard let hiddenItem = filteredItems.filter({ return $0.page?.url == destination }).first else { return }
 			
 			guard let parent = hiddenItem.parent else { return }
@@ -195,6 +197,7 @@ class COREHelpTableOfContentsViewController: UICollectionViewController, UISearc
 				self?.collectionView.selectItem(at: ip, animated: false, scrollPosition: [])
 				
 			}
+			 
 		}
 		else {
 			collectionView.selectItem(at: ip, animated: false, scrollPosition: [])
@@ -209,7 +212,7 @@ class COREHelpTableOfContentsViewController: UICollectionViewController, UISearc
 		var currentSnapshot = dataSource.snapshot(for: .main)
 		
 		let expandedItems = filteredItems.filter {
-			return currentSnapshot.isExpanded($0)
+			return currentSnapshot.isVisible($0)
 		}
 		
 		guard indexPath.item < expandedItems.count else { return }
@@ -306,8 +309,8 @@ class COREHelpTableOfContentsViewController: UICollectionViewController, UISearc
 				
 				let item = TOCItem(page:page)
 				
-				snapshot.append([item])
 				items.append(item)
+				snapshot.append([item])
 				snapshot.expand([item])
 			}
 		}
@@ -377,6 +380,12 @@ class COREHelpTableOfContentsViewController: UICollectionViewController, UISearc
 	}
 	
 	override func indexPathForPreferredFocusedView(in collectionView: UICollectionView) -> IndexPath? {
+		let visibleItems = dataSource.snapshot(for: .main).visibleItems
+		
+		if focusedIndexPath != nil && focusedIndexPath!.item < visibleItems.count {
+			return nil
+		}
+		
 		return focusedIndexPath
 	}
 	
