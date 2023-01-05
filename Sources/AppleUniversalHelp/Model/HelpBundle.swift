@@ -23,6 +23,8 @@ public class HelpPage: HelpItem {
 	
 	var title = "Page"
 	var url:URL
+	var summary = ""
+	var tags:[String] = []
 	
 	public init(url:URL) {
 		self.url = url
@@ -92,5 +94,27 @@ public struct HelpBundle {
 		}
 		
 		rootItems = _rootItems
+	}
+	
+	func pagesMatchingSearchTerm(_ searchTerm:String) -> [HelpPage] {
+		
+		var results:[HelpPage] = []
+		
+		for item in rootItems {
+			if let section = item as? HelpSection {
+				for page in section.pages {
+					if page.title.localizedCaseInsensitiveContains(searchTerm) {
+						results.append(page)
+					}
+				}
+			}
+			else if let page = item as? HelpPage {
+				if page.title.localizedCaseInsensitiveContains(searchTerm) {
+					results.append(page)
+				}
+			}
+		}
+		
+		return results
 	}
 }

@@ -12,6 +12,8 @@ open class COREHelpWindowSceneDelegate: UIResponder, UIWindowSceneDelegate {
 	public var window: UIWindow?
 	let helpRootController = COREHelpRootViewController()
 	
+
+	
 	open func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
 		guard let scene = scene as? UIWindowScene else { return }
 		
@@ -24,10 +26,13 @@ open class COREHelpWindowSceneDelegate: UIResponder, UIWindowSceneDelegate {
 		window.tintColor = .systemPurple
 		
 #if targetEnvironment(macCatalyst)
+		COREHelpSwizzleManager.prepare()
+
 		let toolbar = NSToolbar()
 		toolbar.delegate = self
 		scene.titlebar?.toolbar = toolbar
 		scene.titlebar?.toolbarStyle = .unifiedCompact
+	
 #endif
 		
 		window.rootViewController = helpRootController

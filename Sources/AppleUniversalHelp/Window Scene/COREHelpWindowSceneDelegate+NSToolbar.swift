@@ -8,6 +8,7 @@
 #if targetEnvironment(macCatalyst)
 import UIKit
 import AppKit
+import AppleUniversalCore
 
 extension NSToolbarItem.Identifier {
 	static let back = NSToolbarItem.Identifier("com.help.back")
@@ -15,6 +16,45 @@ extension NSToolbarItem.Identifier {
 	static let navigation = NSToolbarItem.Identifier("com.help.navigation")
 	static let share = NSToolbarItem.Identifier("com.help.share")
 	static let search = NSToolbarItem.Identifier("com.help.search")
+}
+
+
+extension NSNotification.Name {
+	static let searchFieldDidBecomeFirstResponder = NSNotification.Name("searchFieldDidBecomeFirstResponder")
+}
+
+extension NSObject {
+	@objc func addItemWithTitle(_ string:String, action:Selector?, keyEquivalent:String) -> NSObject? {
+		
+		return nil
+	}
+	
+	@objc func addItem(_ item:NSObject?) {
+		
+	}
+	
+	@objc class func separatorItem() -> NSObject? {
+		return nil
+	}
+	
+	@objc func COREHelp_becomeFirstResponder() -> Bool {
+		
+		NotificationCenter.default.post(name: .searchFieldDidBecomeFirstResponder, object: self)
+		
+		return COREHelp_becomeFirstResponder()
+	}
+}
+
+class COREHelpSwizzleManager {
+	class func prepare() {
+		do {
+			let m1 = class_getInstanceMethod(NSClassFromString("NSSearchField"), NSSelectorFromString("becomeFirstResponder"))
+			let m2 = class_getInstanceMethod(NSClassFromString("NSSearchField"), NSSelectorFromString("COREHelp_becomeFirstResponder"))
+			if let m1 = m1, let m2 = m2 {
+				method_exchangeImplementations(m1, m2)
+			}
+		}
+	}
 }
 
 extension COREHelpWindowSceneDelegate: NSToolbarDelegate {
@@ -51,12 +91,74 @@ extension COREHelpWindowSceneDelegate: NSToolbarDelegate {
 			return item
 		}
 		else if itemIdentifier == .search {
-			let item = NSToolbarItemGroup(itemIdentifier: itemIdentifier, images: [UIImage(systemName: "magnifyingglass")!], selectionMode: .momentary, labels: nil, target: self, action: nil)
+			
+			let NSSearchToolbarItem = NSClassFromString("NSSearchToolbarItem") as! NSToolbarItem.Type
+			
+			let item = NSSearchToolbarItem.init(itemIdentifier: itemIdentifier)
+			item.target = self
+			item.action = NSSelectorFromString("toolbarSearch:")
+			
+			if let searchField = item.value(forKey: "searchField") as? NSObject {
+				searchField.setValue("help.search.recents", forKey: "recentsAutosaveName")
+				searchField.setValue(self, forKey: "delegate")
+				NotificationCenter.default.addObserver(forName: .searchFieldDidBecomeFirstResponder, object: searchField, queue: nil) { [weak self] _ in
+					DispatchQueue.main.async {
+						self?.helpRootController.searchVisible = true
+					}
+				}
+
+				if let NSMenu = NSClassFromString("NSMenu") as? NSObject.Type {
+					let menu = NSMenu.init()
+					
+					let NSSearchFieldRecentsTitleMenuItemTag = 1000
+					let NSSearchFieldRecentsMenuItemTag = 1001
+					let NSSearchFieldClearRecentsMenuItemTag = 1002
+					let NSSearchFieldNoRecentsMenuItemTag = 1003
+					
+					/* Build Recents Menu Template */
+					if let NSMenuItem = NSClassFromString("NSMenuItem") as? NSObject.Type {
+						do {
+							let item = menu.addItemWithTitle(NSLocalizedString("SEARCH_RECENTS_TITLE", comment: ""), action: nil, keyEquivalent: "")
+							item?.setValue(NSSearchFieldRecentsTitleMenuItemTag, forKey: "tag")
+						}
+						
+						do {
+							let item = menu.addItemWithTitle("", action: nil, keyEquivalent: "")
+							item?.setValue(NSSearchFieldRecentsMenuItemTag, forKey: "tag")
+						}
+						
+						menu.addItem(NSMenuItem.separatorItem())
+						
+						do {
+							let item = menu.addItemWithTitle(NSLocalizedString("SEARCH_RECENTS_CLEAR", comment: ""), action: nil, keyEquivalent: "")
+							item?.setValue(NSSearchFieldClearRecentsMenuItemTag, forKey: "tag")
+						}
+						
+						do {
+							let item = menu.addItemWithTitle(NSLocalizedString("SEARCH_RECENTS_NO_RECENTS", comment: ""), action: nil, keyEquivalent: "")
+							item?.setValue(NSSearchFieldNoRecentsMenuItemTag, forKey: "tag")
+						}
+					}
+					
+					searchField.setValue(menu, forKey: "searchMenuTemplate")
+					
+					
+				}
+				
+			}
 			
 			return item
 		}
 		
 		return NSToolbarItem(itemIdentifier: itemIdentifier)
 	}
+	
+	@objc func toolbarSearch(_ sender:NSObject?) {
+		guard sender?.responds(to: NSSelectorFromString("stringValue")) ?? false else { return }
+		guard let searchString = sender?.value(forKey: "stringValue") as? String else { return }
+		
+		helpRootController.searchString = searchString
+	}
+	
 }
 #endif

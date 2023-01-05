@@ -22,10 +22,41 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	let splitTOCViewController = COREHelpTableOfContentsViewController()
 	let splitPageViewController = COREHelpPageViewController()
 	
+	let splitSearchViewController = COREHelpSearchViewController()
+	var lastNavigationWasFromSearchPage = false
+	
 	public var helpBundle:HelpBundle? {
 		didSet {
 			splitTOCViewController.helpBundle = helpBundle
 			compactTOCViewController.helpBundle = helpBundle
+			splitSearchViewController.helpBundle = helpBundle
+		}
+	}
+	
+	var searchVisible = false {
+		didSet {
+			if searchVisible == true {
+				if splitSearchViewController.presentingViewController == nil {
+					splitPageViewController.present(splitSearchViewController, animated: false)
+					view.window?.windowScene?.title = NSLocalizedString("SEARCH_RESULTS", comment: "")
+				}
+			}
+			else {
+				splitSearchViewController.presentingViewController?.dismiss(animated: false)
+
+			}
+		}
+	}
+	
+	var searchString = "" {
+		didSet {
+			if searchString.isEmpty {
+				searchVisible = false
+			}
+			else {
+				searchVisible = true
+				splitSearchViewController.searchString = searchString
+			}
 		}
 	}
 	
@@ -36,7 +67,8 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		
 		splitTOCViewController.helpController = self
 		compactTOCViewController.helpController = self
-		
+		splitSearchViewController.helpController = self
+
 		rootSplitViewController.viewControllers = [splitTOCViewController, splitPageViewController]
 		
 		compactRootNavigationController.viewControllers = [compactTOCViewController]
@@ -117,6 +149,8 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		preparePageViewController(vc)
 		compactRootNavigationController.popToRootViewController(animated: false)
 		compactRootNavigationController.pushViewController(vc, animated: true)
+		
+		searchVisible = false
 	}
 	
 	// MARK: -
@@ -130,6 +164,11 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	open override func responds(to aSelector: Selector!) -> Bool {
 		
 		if aSelector == NSSelectorFromString("goBack:") {
+			
+			if searchVisible == true {
+				return true
+			}
+			
 			if traitCollection.horizontalSizeClass == .compact {
 				if let pageVC = compactRootNavigationController.viewControllers.last as? COREHelpPageViewController {
 					return pageVC.webView.canGoBack
@@ -155,6 +194,17 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	}
 	
 	@objc func goBack(_ sender: Any?) {
+		
+		if lastNavigationWasFromSearchPage == true {
+			searchVisible = true
+			lastNavigationWasFromSearchPage = false
+			return
+		}
+		
+		if searchVisible == true {
+			searchVisible.toggle()
+		}
+		
 		if traitCollection.horizontalSizeClass == .compact {
 			guard let pageVC = compactRootNavigationController.viewControllers.last as? COREHelpPageViewController else { return }
 			pageVC.webView.goBack()
