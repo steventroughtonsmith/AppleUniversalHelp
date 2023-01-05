@@ -51,7 +51,7 @@ class COREHelpSwizzleManager {
 			let m1 = class_getInstanceMethod(NSClassFromString("NSSearchField"), NSSelectorFromString("becomeFirstResponder"))
 			let m2 = class_getInstanceMethod(NSClassFromString("NSSearchField"), NSSelectorFromString("COREHelp_becomeFirstResponder"))
 			if let m1 = m1, let m2 = m2 {
-				method_exchangeImplementations(m1, m2)
+				//method_exchangeImplementations(m1, m2)
 			}
 		}
 	}

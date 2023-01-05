@@ -23,7 +23,7 @@ public class HelpPage: HelpItem {
 	
 	var title = "Page"
 	var url:URL
-	var summary = ""
+	var summary = "Lorem ipsum dolor sit amet"
 	var tags:[String] = []
 	
 	public init(url:URL) {

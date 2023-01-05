@@ -51,7 +51,6 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	var searchString = "" {
 		didSet {
 			if searchString.isEmpty {
-				searchVisible = false
 			}
 			else {
 				searchVisible = true

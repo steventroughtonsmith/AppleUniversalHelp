@@ -94,19 +94,19 @@ class COREHelpSearchViewController: UICollectionViewController {
 		
 		let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, SearchResultItem> { cell, indexPath, item in
 			
+			let padding = UIFloat(13)
 			var disclosureOptions = UICellAccessory.OutlineDisclosureOptions(style: .cell)
 			
 			
 			var config = UIListContentConfiguration.subtitleCell()
 			
-			
-			config.directionalLayoutMargins = NSDirectionalEdgeInsets(top: UIFloat(13), leading: 0, bottom: UIFloat(13), trailing: 0)
+			config.directionalLayoutMargins = NSDirectionalEdgeInsets(top: padding, leading: 0, bottom: padding, trailing: 0)
 			
 			config.text = item.page?.title
 			config.textProperties.font = UIFont.boldSystemFont(ofSize: UIFloat(18))
 			config.secondaryText = item.page?.summary
 			config.secondaryTextProperties.font = UIFont.systemFont(ofSize: UIFloat(16))
-			
+			config.textToSecondaryTextVerticalPadding = UIFloat(8)
 			
 			
 			disclosureOptions.isHidden = true
@@ -114,6 +114,7 @@ class COREHelpSearchViewController: UICollectionViewController {
 			
 			var bgConfig = UIBackgroundConfiguration.listPlainCell()
 			bgConfig.cornerRadius = UIFloat(8)
+			bgConfig.backgroundInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: padding*2)
 			cell.backgroundConfiguration = bgConfig
 			
 			cell.accessories = [.outlineDisclosure(options: disclosureOptions)]
