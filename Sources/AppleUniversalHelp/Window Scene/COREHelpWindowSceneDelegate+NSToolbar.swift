@@ -36,25 +36,7 @@ extension NSObject {
 	@objc class func separatorItem() -> NSObject? {
 		return nil
 	}
-	
-	@objc func COREHelp_becomeFirstResponder() -> Bool {
-		
-		NotificationCenter.default.post(name: .searchFieldDidBecomeFirstResponder, object: self)
-		
-		return COREHelp_becomeFirstResponder()
-	}
-}
 
-class COREHelpSwizzleManager {
-	class func prepare() {
-		do {
-			let m1 = class_getInstanceMethod(NSClassFromString("NSSearchField"), NSSelectorFromString("becomeFirstResponder"))
-			let m2 = class_getInstanceMethod(NSClassFromString("NSSearchField"), NSSelectorFromString("COREHelp_becomeFirstResponder"))
-			if let m1 = m1, let m2 = m2 {
-				//method_exchangeImplementations(m1, m2)
-			}
-		}
-	}
 }
 
 extension COREHelpWindowSceneDelegate: NSToolbarDelegate {
@@ -100,12 +82,7 @@ extension COREHelpWindowSceneDelegate: NSToolbarDelegate {
 			
 			if let searchField = item.value(forKey: "searchField") as? NSObject {
 				searchField.setValue("help.search.recents", forKey: "recentsAutosaveName")
-				searchField.setValue(self, forKey: "delegate")
-				NotificationCenter.default.addObserver(forName: .searchFieldDidBecomeFirstResponder, object: searchField, queue: nil) { [weak self] _ in
-					DispatchQueue.main.async {
-						self?.helpRootController.searchVisible = true
-					}
-				}
+				searchField.setValue(true, forKey: "sendsWholeSearchString")
 
 				if let NSMenu = NSClassFromString("NSMenu") as? NSObject.Type {
 					let menu = NSMenu.init()

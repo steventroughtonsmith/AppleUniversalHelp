@@ -23,12 +23,28 @@ public class HelpPage: HelpItem {
 	
 	var title = "Page"
 	var url:URL
-	var summary = "Lorem ipsum dolor sit amet"
+	var summary = ""
 	var tags:[String] = []
 	
 	public init(url:URL) {
 		self.url = url
 		title = (url.lastPathComponent as NSString).deletingPathExtension
+		
+		let metadataURL = url.appendingPathExtension("json")
+		guard let metadataPath = metadataURL.path.removingPercentEncoding else { return }
+		
+		if FileManager.default.fileExists(atPath: metadataPath) {
+			do {
+				let data = try Data(contentsOf: metadataURL)
+				let metadata = try JSONDecoder().decode([String:[String]].self, from: data)
+				
+				summary = metadata["summary"]?.first ?? ""
+				tags = metadata["tags"] ?? []
+			}
+			catch {
+				
+			}
+		}
 	}
 }
 
@@ -47,6 +63,10 @@ public class HelpSection: HelpItem {
 			let nspath = url.path as NSString
 			let contents = try FileManager.default.contentsOfDirectory(atPath: nspath as String)
 			for item in contents {
+				if !item.hasSuffix("html") {
+					continue
+				}
+				
 				let pagePath = nspath.appendingPathComponent(item)
 				
 				_pages.append(HelpPage(url:URL(fileURLWithPath: pagePath)))
@@ -98,6 +118,7 @@ public struct HelpBundle {
 	
 	func pagesMatchingSearchTerm(_ searchTerm:String) -> [HelpPage] {
 		
+		let searchTerm = searchTerm.lowercased()
 		var results:[HelpPage] = []
 		
 		for item in rootItems {
@@ -106,11 +127,34 @@ public struct HelpBundle {
 					if page.title.localizedCaseInsensitiveContains(searchTerm) {
 						results.append(page)
 					}
+					else if page.summary.localizedCaseInsensitiveContains(searchTerm) {
+						results.append(page)
+					}
+					else {
+						for tag in page.tags {
+							if tag.localizedCaseInsensitiveContains(searchTerm) {
+								results.append(page)
+								break
+							}
+						}
+					}
+					
 				}
 			}
 			else if let page = item as? HelpPage {
 				if page.title.localizedCaseInsensitiveContains(searchTerm) {
 					results.append(page)
+				}
+				else if page.summary.localizedCaseInsensitiveContains(searchTerm) {
+					results.append(page)
+				}
+				else {
+					for tag in page.tags {
+						if tag.localizedCaseInsensitiveContains(searchTerm) {
+							results.append(page)
+							break
+						}
+					}
 				}
 			}
 		}

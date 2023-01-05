@@ -72,8 +72,6 @@ class COREHelpSearchViewController: UICollectionViewController {
 		super.init(collectionViewLayout: layout)
 		
 		modalPresentationStyle = .overCurrentContext
-
-		collectionView.contentInset = UIEdgeInsets(top: UIFloat(13), left: UIFloat(13), bottom: UIFloat(13), right: UIFloat(13))
 		
 		collectionView.focusGroupIdentifier = "HELP_TOC_TITLE"
 		if #available(iOS 15.0, *) {
@@ -113,8 +111,6 @@ class COREHelpSearchViewController: UICollectionViewController {
 			cell.contentConfiguration = config
 			
 			var bgConfig = UIBackgroundConfiguration.listPlainCell()
-			bgConfig.cornerRadius = UIFloat(8)
-			bgConfig.backgroundInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: padding*2)
 			cell.backgroundConfiguration = bgConfig
 			
 			cell.accessories = [.outlineDisclosure(options: disclosureOptions)]
@@ -139,7 +135,6 @@ class COREHelpSearchViewController: UICollectionViewController {
 		
 		let item = items[indexPath.item]
 		
-		helpController?.lastNavigationWasFromSearchPage = true
 		helpController?.navigate(to: item.page)
 		
 		cachedIndexPath = indexPath

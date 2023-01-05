@@ -26,7 +26,6 @@ open class COREHelpWindowSceneDelegate: UIResponder, UIWindowSceneDelegate {
 		window.tintColor = .systemPurple
 		
 #if targetEnvironment(macCatalyst)
-		COREHelpSwizzleManager.prepare()
 
 		let toolbar = NSToolbar()
 		toolbar.delegate = self

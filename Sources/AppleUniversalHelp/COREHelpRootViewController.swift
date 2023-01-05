@@ -23,7 +23,6 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	let splitPageViewController = COREHelpPageViewController()
 	
 	let splitSearchViewController = COREHelpSearchViewController()
-	var lastNavigationWasFromSearchPage = false
 	
 	public var helpBundle:HelpBundle? {
 		didSet {
@@ -165,7 +164,7 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		if aSelector == NSSelectorFromString("goBack:") {
 			
 			if searchVisible == true {
-				return true
+				return false
 			}
 			
 			if traitCollection.horizontalSizeClass == .compact {
@@ -179,6 +178,10 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		}
 		
 		if aSelector == NSSelectorFromString("goForward:") {
+			if searchVisible == true {
+				return false
+			}
+			
 			if traitCollection.horizontalSizeClass == .compact {
 				if let pageVC = compactRootNavigationController.viewControllers.last as? COREHelpPageViewController {
 					return pageVC.webView.canGoForward
@@ -193,16 +196,6 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	}
 	
 	@objc func goBack(_ sender: Any?) {
-		
-		if lastNavigationWasFromSearchPage == true {
-			searchVisible = true
-			lastNavigationWasFromSearchPage = false
-			return
-		}
-		
-		if searchVisible == true {
-			searchVisible.toggle()
-		}
 		
 		if traitCollection.horizontalSizeClass == .compact {
 			guard let pageVC = compactRootNavigationController.viewControllers.last as? COREHelpPageViewController else { return }
