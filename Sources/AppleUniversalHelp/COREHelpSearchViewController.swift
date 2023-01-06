@@ -73,10 +73,13 @@ class COREHelpSearchViewController: UICollectionViewController {
 		
 		modalPresentationStyle = .overCurrentContext
 		
-		collectionView.focusGroupIdentifier = "HELP_TOC_TITLE"
+		title = NSLocalizedString("SEARCH_RESULTS", comment: "")
+		
 		if #available(iOS 15.0, *) {
 			collectionView.allowsFocus = true
 		}
+		
+		navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(dismiss(_:)))
 				
 		configureDataSource()
 		
@@ -151,7 +154,6 @@ class COREHelpSearchViewController: UICollectionViewController {
 		
 		let indexPath = IndexPath(item: 0, section: 0)
 		collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
-		actuateItem(at: indexPath)
 	}
 	
 	override func viewDidAppear(_ animated: Bool) {
@@ -254,4 +256,9 @@ class COREHelpSearchViewController: UICollectionViewController {
 		return true
 	}
 	
+	// MARK: -
+	
+	@objc func dismiss(_ sender: Any?) {
+		presentingViewController?.dismiss(animated: true)
+	}
 }

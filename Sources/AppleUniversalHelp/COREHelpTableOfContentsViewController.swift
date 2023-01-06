@@ -8,16 +8,10 @@
 import UIKit
 import AppleUniversalCore
 
-class COREHelpTableOfContentsViewController: UICollectionViewController, UISearchResultsUpdating {
+class COREHelpTableOfContentsViewController: UICollectionViewController, UISearchResultsUpdating, UISearchBarDelegate {
 	
 	
 	private let reuseIdentifier = "Cell"
-	
-	var filterString = "" {
-		didSet {
-			refresh()
-		}
-	}
 	
 	var typeselectString = ""
 	var lastTypeSelectTimestamp = TimeInterval.zero
@@ -92,6 +86,7 @@ class COREHelpTableOfContentsViewController: UICollectionViewController, UISearc
 		let searchController = UISearchController()
 		searchController.searchResultsUpdater = self
 		searchController.searchBar.placeholder = NSLocalizedString("HELP_TOC_SEARCH_PLACEHOLDER", comment:"")
+		searchController.searchBar.delegate = self
 		searchController.obscuresBackgroundDuringPresentation = false
 		
 		navigationItem.searchController = searchController
@@ -166,7 +161,7 @@ class COREHelpTableOfContentsViewController: UICollectionViewController, UISearc
 		var currentSnapshot = dataSource.snapshot(for: .main)
 		
 		func _indexPathOfDestination(_ destination:URL?) -> IndexPath {
-			let expandedItems = filteredItems.filter {
+			let expandedItems = items.filter {
 				return currentSnapshot.isVisible($0)
 			}
 			
@@ -188,7 +183,7 @@ class COREHelpTableOfContentsViewController: UICollectionViewController, UISearc
 		if shouldExpand == true {
 			
 			
-			guard let hiddenItem = filteredItems.filter({ return $0.page?.url == destination }).first else { return }
+			guard let hiddenItem = items.filter({ return $0.page?.url == destination }).first else { return }
 			
 			guard let parent = hiddenItem.parent else { return }
 			currentSnapshot.expand([parent])
@@ -211,7 +206,7 @@ class COREHelpTableOfContentsViewController: UICollectionViewController, UISearc
 		
 		var currentSnapshot = dataSource.snapshot(for: .main)
 		
-		let expandedItems = filteredItems.filter {
+		let expandedItems = items.filter {
 			return currentSnapshot.isVisible($0)
 		}
 		
@@ -261,23 +256,6 @@ class COREHelpTableOfContentsViewController: UICollectionViewController, UISearc
 		didSet {
 		}
 	}
-	
-	var filteredItems:[TOCItem] {
-		get {
-			if filterString.isEmpty {
-				return items
-			}
-			else {
-				return items.filter { item in
-					
-					let title = ""
-					
-					return title.contains(filterString)
-				}
-			}
-		}
-	}
-	
 	
 	func refresh() {
 		guard let dataSource = collectionView.dataSource as? UICollectionViewDiffableDataSource<Section, TOCItem> else { return }
@@ -395,8 +373,16 @@ class COREHelpTableOfContentsViewController: UICollectionViewController, UISearc
 	
 	// MARK: -
 	
+	func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+		helpController?.searchString = searchBar.text ?? ""
+	}
+	
+	func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+		helpController?.searchString = ""
+		helpController?.searchVisible = false
+	}
+	
 	@objc(updateSearchResultsForSearchController:) func updateSearchResults(for searchController: UISearchController) {
-		filterString = searchController.searchBar.text ?? ""
 	}
 	
 	// MARK: -

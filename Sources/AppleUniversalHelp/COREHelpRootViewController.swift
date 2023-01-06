@@ -19,9 +19,11 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	let compactRootNavigationController = UINavigationController()
 	
 	let compactTOCViewController = COREHelpTableOfContentsViewController()
+	let compactPageViewController = COREHelpPageViewController()
+	let compactSearchViewController = COREHelpSearchViewController()
+
 	let splitTOCViewController = COREHelpTableOfContentsViewController()
 	let splitPageViewController = COREHelpPageViewController()
-	
 	let splitSearchViewController = COREHelpSearchViewController()
 	
 	public var helpBundle:HelpBundle? {
@@ -29,6 +31,7 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 			splitTOCViewController.helpBundle = helpBundle
 			compactTOCViewController.helpBundle = helpBundle
 			splitSearchViewController.helpBundle = helpBundle
+			compactSearchViewController.helpBundle = helpBundle
 		}
 	}
 	
@@ -36,8 +39,15 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		didSet {
 			if searchVisible == true {
 				if splitSearchViewController.presentingViewController == nil {
-					splitPageViewController.present(splitSearchViewController, animated: false)
-					view.window?.windowScene?.title = NSLocalizedString("SEARCH_RESULTS", comment: "")
+					if view.window?.traitCollection.horizontalSizeClass == .compact {
+						let nc = UINavigationController(rootViewController: compactSearchViewController)
+						nc.view.tintColor = .systemPurple
+						compactRootNavigationController.present(nc, animated: true)
+					}
+					else {
+						splitPageViewController.present(splitSearchViewController, animated: false)
+						view.window?.windowScene?.title = NSLocalizedString("SEARCH_RESULTS", comment: "")
+					}
 				}
 			}
 			else {
@@ -54,6 +64,7 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 			else {
 				searchVisible = true
 				splitSearchViewController.searchString = searchString
+				compactSearchViewController.searchString = searchString
 			}
 		}
 	}
@@ -66,10 +77,13 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		splitTOCViewController.helpController = self
 		compactTOCViewController.helpController = self
 		splitSearchViewController.helpController = self
+		compactSearchViewController.helpController = self
 
 		rootSplitViewController.viewControllers = [splitTOCViewController, splitPageViewController]
 		
 		compactRootNavigationController.viewControllers = [compactTOCViewController]
+		compactRootNavigationController.delegate = self
+		
 		rootSplitViewController.setViewController(compactRootNavigationController, for: .compact)
 		
 		rootSplitViewController.primaryBackgroundStyle = .sidebar
@@ -129,10 +143,14 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		let backItem = UIBarButtonItem(image:UIImage(systemName: "chevron.left"), style:.plain, target: self, action: #selector(goBack(_:)))
 		let forwardItem = UIBarButtonItem(image:UIImage(systemName: "chevron.right"), style:.plain, target: self, action: #selector(goForward(_:)))
 		
-		viewController.navigationItem.leftBarButtonItems = [backItem, forwardItem]
 		
 		if traitCollection.horizontalSizeClass == .compact {
-			viewController.navigationItem.leftBarButtonItems?.insert(sidebarItem, at: 0)
+			viewController.toolbarItems = [.fixedSpace(UIFloat(20)), backItem, .fixedSpace(UIFloat(40)), forwardItem, .flexibleSpace()]
+			viewController.navigationItem.leftBarButtonItems = [sidebarItem]
+		}
+		else {
+			viewController.navigationItem.leftBarButtonItems = [backItem, forwardItem]
+			viewController.toolbarItems = []
 		}
 		
 		viewController.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismiss(_:)))
@@ -142,13 +160,20 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		splitPageViewController.navigate(to: page)
 		view.window?.windowScene?.title = page?.title
 		
-		let vc = COREHelpPageViewController()
-		vc.navigate(to: page)
-		preparePageViewController(vc)
+		compactPageViewController.navigate(to: page)
+		preparePageViewController(compactPageViewController)
 		compactRootNavigationController.popToRootViewController(animated: false)
-		compactRootNavigationController.pushViewController(vc, animated: true)
+		compactRootNavigationController.pushViewController(compactPageViewController, animated: true)
+		
+		compactSearchViewController.presentingViewController?.dismiss(animated: true)
 		
 		searchVisible = false
+	}
+	
+	open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+		super.traitCollectionDidChange(previousTraitCollection)
+		
+		preparePageViewController(compactPageViewController)
 	}
 	
 	// MARK: -
@@ -218,5 +243,19 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	
 	@objc func popToTableOfContents(_ sender: Any?) {
 		compactRootNavigationController.popToRootViewController(animated: true)
+	}
+	
+	// MARK: - Navigation Delegate
+	
+	public func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
+		
+		guard traitCollection.horizontalSizeClass == .compact else { return }
+		
+		if navigationController.viewControllers.count == 1 {
+			compactRootNavigationController.isToolbarHidden = true
+		}
+		else {
+			compactRootNavigationController.isToolbarHidden = false
+		}
 	}
 }
