@@ -71,7 +71,6 @@ class COREHelpSearchViewController: UICollectionViewController {
 		
 		super.init(collectionViewLayout: layout)
 		
-		modalPresentationStyle = .overCurrentContext
 		
 		title = NSLocalizedString("SEARCH_RESULTS", comment: "")
 		

@@ -45,13 +45,19 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 						compactRootNavigationController.present(nc, animated: true)
 					}
 					else {
-						splitPageViewController.present(splitSearchViewController, animated: false)
+						let nc = UINavigationController(rootViewController: splitSearchViewController)
+						nc.view.tintColor = .systemPurple
+						nc.modalPresentationStyle = .overCurrentContext
+						
+						nc.isNavigationBarHidden = (UIDevice.current.userInterfaceIdiom == .mac)
+
+						splitPageViewController.present(nc, animated: UIDevice.current.userInterfaceIdiom == .mac ? false : true)
 						view.window?.windowScene?.title = NSLocalizedString("SEARCH_RESULTS", comment: "")
 					}
 				}
 			}
 			else {
-				splitSearchViewController.presentingViewController?.dismiss(animated: false)
+				splitSearchViewController.presentingViewController?.dismiss(animated: UIDevice.current.userInterfaceIdiom == .mac ? false : true)
 
 			}
 		}
