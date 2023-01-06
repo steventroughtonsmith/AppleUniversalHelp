@@ -162,7 +162,7 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		viewController.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismiss(_:)))
 	}
 	
-	func navigate(to page:HelpPage?) {
+	public func navigate(to page:HelpPage?) {
 		splitPageViewController.navigate(to: page)
 		view.window?.windowScene?.title = page?.title
 		
