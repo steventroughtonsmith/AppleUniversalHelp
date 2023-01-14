@@ -123,47 +123,49 @@ public struct HelpBundle {
 	
 	func pagesMatchingSearchTerm(_ searchTerm:String) -> [HelpPage] {
 		
-		let searchTerm = searchTerm.lowercased()
+		let searchComponents = searchTerm.components(separatedBy: .whitespacesAndNewlines)
 		var results:[HelpPage] = []
+		var relevance:[HelpPage:Int] = [:]
 		
-		for item in rootItems {
-			if let section = item as? HelpSection {
-				for page in section.pages {
-					if page.title.localizedCaseInsensitiveContains(searchTerm) {
-						results.append(page)
-					}
-					else if page.summary.localizedCaseInsensitiveContains(searchTerm) {
-						results.append(page)
-					}
-					else {
-						for tag in page.tags {
-							if tag.localizedCaseInsensitiveContains(searchTerm) {
-								results.append(page)
-								break
-							}
-						}
-					}
-					
-				}
-			}
-			else if let page = item as? HelpPage {
-				if page.title.localizedCaseInsensitiveContains(searchTerm) {
-					results.append(page)
-				}
-				else if page.summary.localizedCaseInsensitiveContains(searchTerm) {
-					results.append(page)
-				}
-				else {
-					for tag in page.tags {
-						if tag.localizedCaseInsensitiveContains(searchTerm) {
+		func _matchPage(_ page:HelpPage, tags:[String]) {
+			for match in tags {
+				for searchComponent in searchComponents {
+					if match.localizedCaseInsensitiveContains(searchComponent) {
+						if !results.contains(page) {
 							results.append(page)
-							break
+							relevance[page] = 1
+						}
+						else {
+							relevance[page] = (relevance[page] ?? 1) + 1
 						}
 					}
 				}
 			}
 		}
 		
-		return results
+		for item in rootItems {
+			if let section = item as? HelpSection {
+				for page in section.pages {
+					let titleComponents = page.title.components(separatedBy: .whitespacesAndNewlines)
+					let summaryComponents = page.summary.components(separatedBy: .whitespacesAndNewlines)
+				
+					_matchPage(page, tags: titleComponents)
+					_matchPage(page, tags: summaryComponents)
+					_matchPage(page, tags: page.tags)
+				}
+			}
+			else if let page = item as? HelpPage {
+				let titleComponents = page.title.components(separatedBy: .whitespacesAndNewlines)
+				let summaryComponents = page.summary.components(separatedBy: .whitespacesAndNewlines)
+
+				_matchPage(page, tags: titleComponents)
+				_matchPage(page, tags: summaryComponents)
+				_matchPage(page, tags: page.tags)
+			}
+		}
+		
+		return results.sorted { a, b in
+			return (relevance[a] ?? 0) > (relevance[b] ?? 0)
+		}
 	}
 }
