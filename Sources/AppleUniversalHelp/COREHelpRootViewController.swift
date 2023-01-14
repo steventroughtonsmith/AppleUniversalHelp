@@ -92,8 +92,8 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		super.init(nibName: nil, bundle: nil)
 		
 		sidebarItem = UIBarButtonItem(image:UIImage(systemName: "sidebar.leading"), style:.plain, target: self, action: #selector(popToTableOfContents(_:)))
-		backItem = UIBarButtonItem(image:UIImage(systemName: "chevron.left"), style:.plain, target: self, action: #selector(goBack(_:)))
-		forwardItem = UIBarButtonItem(image:UIImage(systemName: "chevron.right"), style:.plain, target: self, action: #selector(goForward(_:)))
+		backItem = UIBarButtonItem(image:UIImage(systemName: "chevron.backward"), style:.plain, target: self, action: #selector(goBack(_:)))
+		forwardItem = UIBarButtonItem(image:UIImage(systemName: "chevron.forward"), style:.plain, target: self, action: #selector(goForward(_:)))
 		
 		
 		splitTOCViewController.helpController = self
