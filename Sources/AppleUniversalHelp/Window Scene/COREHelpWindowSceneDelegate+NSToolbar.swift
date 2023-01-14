@@ -56,13 +56,13 @@ extension COREHelpWindowSceneDelegate: NSToolbarDelegate {
 	public func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
 		
 		if itemIdentifier == .back {
-			let item = NSToolbarItemGroup(itemIdentifier: itemIdentifier, images: [UIImage(systemName: "chevron.left")!], selectionMode: .momentary, labels: nil, target: helpRootController, action: NSSelectorFromString("goBack:"))
+			let item = NSToolbarItemGroup(itemIdentifier: itemIdentifier, images: [UIImage(systemName: "chevron.backward")!], selectionMode: .momentary, labels: nil, target: helpRootController, action: NSSelectorFromString("goBack:"))
 			item.isNavigational = true
 			
 			return item
 		}
 		else if itemIdentifier == .forward {
-			let item = NSToolbarItemGroup(itemIdentifier: itemIdentifier, images: [UIImage(systemName: "chevron.right")!], selectionMode: .momentary, labels: nil, target: helpRootController, action: NSSelectorFromString("goForward:"))
+			let item = NSToolbarItemGroup(itemIdentifier: itemIdentifier, images: [UIImage(systemName: "chevron.forward")!], selectionMode: .momentary, labels: nil, target: helpRootController, action: NSSelectorFromString("goForward:"))
 			item.isNavigational = true
 			
 			return item

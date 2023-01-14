@@ -317,6 +317,16 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	func validateNavigationButtons() {
 		backItem?.isEnabled = responds(to: NSSelectorFromString("goBack:"))
 		forwardItem?.isEnabled = responds(to: NSSelectorFromString("goForward:"))
+		
+		#if targetEnvironment(macCatalyst)
+		/* NSToolbar's item validation is delayed and needs a kick to update properly */
+		if let toolbar = view.window?.windowScene?.titlebar?.toolbar {
+			let selector = NSSelectorFromString("validateVisibleItems")
+			if toolbar.responds(to: selector) {
+				toolbar.perform(selector)
+			}
+		}
+		#endif
 	}
 	
 	// MARK: - Navigation Delegate
