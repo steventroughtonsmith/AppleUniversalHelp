@@ -69,7 +69,7 @@ class COREHelpPageViewController: UIViewController, WKNavigationDelegate {
 		
 		guard let url = navigationAction.request.url else { return }
 		
-		if url.absoluteString.hasPrefix("http") || url.absoluteString.hasPrefix("https") {
+		if url.absoluteString.hasPrefix("http") || url.absoluteString.hasPrefix("https") || url.absoluteString.hasPrefix("mailto:") {
 			UIApplication.shared.open(url)
 			decisionHandler(.cancel)
 		}
