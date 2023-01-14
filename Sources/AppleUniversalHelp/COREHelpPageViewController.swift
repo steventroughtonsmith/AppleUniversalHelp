@@ -75,4 +75,8 @@ class COREHelpPageViewController: UIViewController, WKNavigationDelegate {
 			}
 		}
 	}
+	
+	func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+		NotificationCenter.default.post(name: .viewerDestinationChanged, object: nil)
+	}
 }

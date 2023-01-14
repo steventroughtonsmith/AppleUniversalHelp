@@ -26,6 +26,14 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	let splitPageViewController = COREHelpPageViewController()
 	let splitSearchViewController = COREHelpSearchViewController()
 	
+	// MARK: - Toolbar Items
+	
+	var sidebarItem:UIBarButtonItem!
+	var backItem:UIBarButtonItem!
+	var forwardItem:UIBarButtonItem!
+	
+	// MARK: -
+	
 	public var helpBundle:HelpBundle? {
 		didSet {
 			splitTOCViewController.helpBundle = helpBundle
@@ -80,6 +88,11 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	public init() {
 		super.init(nibName: nil, bundle: nil)
 		
+		sidebarItem = UIBarButtonItem(image:UIImage(systemName: "sidebar.leading"), style:.plain, target: self, action: #selector(popToTableOfContents(_:)))
+		backItem = UIBarButtonItem(image:UIImage(systemName: "chevron.left"), style:.plain, target: self, action: #selector(goBack(_:)))
+		forwardItem = UIBarButtonItem(image:UIImage(systemName: "chevron.right"), style:.plain, target: self, action: #selector(goForward(_:)))
+	
+		
 		splitTOCViewController.helpController = self
 		compactTOCViewController.helpController = self
 		splitSearchViewController.helpController = self
@@ -105,6 +118,14 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		
 		addChild(rootSplitViewController)
 		view.addSubview(rootSplitViewController.view)
+		
+		validateNavigationButtons()
+				
+		NotificationCenter.default.addObserver(forName: .viewerDestinationChanged, object: nil, queue: nil) { [weak self] _ in
+			DispatchQueue.main.async {
+				self?.validateNavigationButtons()
+			}
+		}
 		
 		NotificationCenter.default.addObserver(forName: .toggleTableOfContents, object: nil, queue: nil) { [weak self] _ in
 			
@@ -143,11 +164,6 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	// MARK: -
 	
 	func preparePageViewController(_ viewController:COREHelpPageViewController) {
-		
-		let sidebarItem = UIBarButtonItem(image:UIImage(systemName: "sidebar.leading"), style:.plain, target: self, action: #selector(popToTableOfContents(_:)))
-		
-		let backItem = UIBarButtonItem(image:UIImage(systemName: "chevron.left"), style:.plain, target: self, action: #selector(goBack(_:)))
-		let forwardItem = UIBarButtonItem(image:UIImage(systemName: "chevron.right"), style:.plain, target: self, action: #selector(goForward(_:)))
 		
 		
 		if traitCollection.horizontalSizeClass == .compact {
@@ -235,6 +251,8 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		else {
 			splitPageViewController.webView.goBack()
 		}
+		
+		validateNavigationButtons()
 	}
 	
 	@objc func goForward(_ sender: Any?) {
@@ -245,10 +263,17 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		else {
 			splitPageViewController.webView.goForward()
 		}
+		
+		validateNavigationButtons()
 	}
 	
 	@objc func popToTableOfContents(_ sender: Any?) {
 		compactRootNavigationController.popToRootViewController(animated: true)
+	}
+	
+	func validateNavigationButtons() {
+		backItem?.isEnabled = responds(to: NSSelectorFromString("goBack:"))
+		forwardItem?.isEnabled = responds(to: NSSelectorFromString("goForward:"))
 	}
 	
 	// MARK: - Navigation Delegate
