@@ -371,7 +371,7 @@ class COREHelpTableOfContentsViewController: UICollectionViewController, UISearc
 		return true
 	}
 	
-	@objc func focusSearch(_ sender:Any?) {
+	func _focusSearch(_ sender:Any?) {
 		navigationItem.searchController?.searchBar.becomeFirstResponder()
 	}
 	

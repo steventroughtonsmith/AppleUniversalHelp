@@ -207,6 +207,10 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		let backCommand = UIKeyCommand(input: "[", modifierFlags: .command, action: NSSelectorFromString("goBack:"))
 		let forwardCommand = UIKeyCommand(input: "]", modifierFlags: .command, action: NSSelectorFromString("goForward:"))
 		let searchCommand = UIKeyCommand(input: "f", modifierFlags: .command, action: NSSelectorFromString("focusSearch:"))
+		if #available(macCatalyst 15.0, *) {
+			searchCommand.wantsPriorityOverSystemBehavior = true
+		}
+		
 		let dismissCommand = UIKeyCommand(input: UIKeyCommand.inputEscape, modifierFlags: [], action: NSSelectorFromString("dismissSearchOrSelf:"))
 
 		return [backCommand, forwardCommand, searchCommand, dismissCommand]
@@ -219,11 +223,11 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		if view.window?.traitCollection.horizontalSizeClass == .compact {
 			compactRootNavigationController.popToRootViewController(animated: true)
 			DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-				self?.compactTOCViewController.focusSearch(self)
+				self?.compactTOCViewController._focusSearch(self)
 			}
 		}
 		else {
-			splitTOCViewController.focusSearch(self)
+			splitTOCViewController._focusSearch(self)
 		}
 #endif
 	}
