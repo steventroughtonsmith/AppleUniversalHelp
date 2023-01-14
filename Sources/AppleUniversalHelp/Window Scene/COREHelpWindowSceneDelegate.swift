@@ -10,6 +10,7 @@ import AppleUniversalCore
 
 open class COREHelpWindowSceneDelegate: UIResponder, UIWindowSceneDelegate {
 	public var window: UIWindow?
+
 	public let helpRootController = COREHelpRootViewController()
 	
 	open func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {

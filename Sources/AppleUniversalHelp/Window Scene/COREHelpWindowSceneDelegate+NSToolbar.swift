@@ -20,7 +20,7 @@ extension NSToolbarItem.Identifier {
 
 
 extension NSNotification.Name {
-	static let searchFieldDidBecomeFirstResponder = NSNotification.Name("searchFieldDidBecomeFirstResponder")
+	static let makeNSSearchFieldFirstResponder = NSNotification.Name("COREHelpMakeNSSearchFieldFirstResponder")
 }
 
 extension NSObject {
@@ -122,6 +122,15 @@ extension COREHelpWindowSceneDelegate: NSToolbarDelegate {
 					
 				}
 				
+				NotificationCenter.default.addObserver(forName: .makeNSSearchFieldFirstResponder, object: nil, queue: nil) { _ in
+					let selector = NSSelectorFromString("becomeFirstResponder")
+					
+					if searchField.responds(to: selector) {
+						DispatchQueue.main.async {
+							searchField.perform(selector)
+						}
+					}
+				}
 			}
 			
 			return item

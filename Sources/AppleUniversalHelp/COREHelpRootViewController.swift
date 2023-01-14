@@ -21,7 +21,7 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	let compactTOCViewController = COREHelpTableOfContentsViewController()
 	let compactPageViewController = COREHelpPageViewController()
 	let compactSearchViewController = COREHelpSearchViewController()
-
+	
 	let splitTOCViewController = COREHelpTableOfContentsViewController()
 	let splitPageViewController = COREHelpPageViewController()
 	let splitSearchViewController = COREHelpSearchViewController()
@@ -61,7 +61,7 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 						nc.modalPresentationStyle = .overCurrentContext
 						
 						nc.isNavigationBarHidden = (UIDevice.current.userInterfaceIdiom == .mac)
-
+						
 						splitPageViewController.present(nc, animated: UIDevice.current.userInterfaceIdiom == .mac ? false : true)
 						view.window?.windowScene?.title = NSLocalizedString("SEARCH_RESULTS", comment: "")
 					}
@@ -69,7 +69,7 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 			}
 			else {
 				splitSearchViewController.presentingViewController?.dismiss(animated: UIDevice.current.userInterfaceIdiom == .mac ? false : true)
-
+				
 			}
 		}
 	}
@@ -94,13 +94,13 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		sidebarItem = UIBarButtonItem(image:UIImage(systemName: "sidebar.leading"), style:.plain, target: self, action: #selector(popToTableOfContents(_:)))
 		backItem = UIBarButtonItem(image:UIImage(systemName: "chevron.left"), style:.plain, target: self, action: #selector(goBack(_:)))
 		forwardItem = UIBarButtonItem(image:UIImage(systemName: "chevron.right"), style:.plain, target: self, action: #selector(goForward(_:)))
-	
+		
 		
 		splitTOCViewController.helpController = self
 		compactTOCViewController.helpController = self
 		splitSearchViewController.helpController = self
 		compactSearchViewController.helpController = self
-
+		
 		rootSplitViewController.viewControllers = [splitTOCViewController, splitPageViewController]
 		
 		compactRootNavigationController.viewControllers = [compactTOCViewController]
@@ -123,7 +123,7 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		view.addSubview(rootSplitViewController.view)
 		
 		validateNavigationButtons()
-				
+		
 		NotificationCenter.default.addObserver(forName: .viewerDestinationChanged, object: nil, queue: nil) { [weak self] _ in
 			DispatchQueue.main.async {
 				self?.validateNavigationButtons()
@@ -202,15 +202,42 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	}
 	
 	// MARK: - Key Commands
-
+	
 	open override var keyCommands: [UIKeyCommand]? {
 		let backCommand = UIKeyCommand(input: "[", modifierFlags: .command, action: NSSelectorFromString("goBack:"))
 		let forwardCommand = UIKeyCommand(input: "]", modifierFlags: .command, action: NSSelectorFromString("goForward:"))
-		
-		return [backCommand, forwardCommand]
+		let searchCommand = UIKeyCommand(input: "f", modifierFlags: .command, action: NSSelectorFromString("focusSearch:"))
+		let dismissCommand = UIKeyCommand(input: UIKeyCommand.inputEscape, modifierFlags: [], action: NSSelectorFromString("dismissSearchOrSelf:"))
+
+		return [backCommand, forwardCommand, searchCommand, dismissCommand]
+	}
+	
+	@objc func focusSearch(_ sender:Any?) {
+#if targetEnvironment(macCatalyst)
+		NotificationCenter.default.post(name:.makeNSSearchFieldFirstResponder, object:nil)
+#else
+		if view.window?.traitCollection.horizontalSizeClass == .compact {
+			compactRootNavigationController.popToRootViewController(animated: true)
+			DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+				self?.compactTOCViewController.focusSearch(self)
+			}
+		}
+		else {
+			splitTOCViewController.focusSearch(self)
+		}
+#endif
 	}
 	
 	// MARK: -
+	
+	@objc func dismissSearchOrSelf(_ sender: Any?) {
+		if searchVisible == true {
+			searchVisible.toggle()
+		}
+		else {
+			dismiss(sender)
+		}
+	}
 	
 	@objc func dismiss(_ sender: Any?) {
 		presentingViewController?.dismiss(animated: true)
