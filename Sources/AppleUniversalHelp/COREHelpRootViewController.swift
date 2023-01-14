@@ -40,6 +40,9 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 			compactTOCViewController.helpBundle = helpBundle
 			splitSearchViewController.helpBundle = helpBundle
 			compactSearchViewController.helpBundle = helpBundle
+			
+			compactPageViewController.baseURL = helpBundle?.url
+			splitPageViewController.baseURL = helpBundle?.url
 		}
 	}
 	
@@ -196,6 +199,15 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		super.traitCollectionDidChange(previousTraitCollection)
 		
 		preparePageViewController(compactPageViewController)
+	}
+	
+	// MARK: - Key Commands
+
+	open override var keyCommands: [UIKeyCommand]? {
+		let backCommand = UIKeyCommand(input: "[", modifierFlags: .command, action: NSSelectorFromString("goBack:"))
+		let forwardCommand = UIKeyCommand(input: "]", modifierFlags: .command, action: NSSelectorFromString("goForward:"))
+		
+		return [backCommand, forwardCommand]
 	}
 	
 	// MARK: -

@@ -15,12 +15,21 @@ enum COREHelpError: Error {
 class COREHelpPageViewController: UIViewController, WKNavigationDelegate {
 	var webView = {
 		let config = WKWebViewConfiguration()
+		config.setURLSchemeHandler(COREHelpResourceSchemeHandler(), forURLScheme: "helpbundle")
 		config.setURLSchemeHandler(COREHelpResourceSchemeHandler(), forURLScheme: "inbuilt")
 		config.setURLSchemeHandler(COREHelpSymbolSchemeHandler(), forURLScheme: "symbol")
 		config.setURLSchemeHandler(COREHelpFunctionSchemeHandler(), forURLScheme: "function")
 		let view = WKWebView(frame: .zero, configuration: config)
 		return view
 	}()
+	
+	var baseURL:URL? {
+		didSet {
+			if let handler = webView.configuration.urlSchemeHandler(forURLScheme: "helpbundle") as? COREHelpResourceSchemeHandler {
+				handler.baseURL = baseURL
+			}
+		}
+	}
 	
 	init() {
 		super.init(nibName: nil, bundle: nil)
@@ -32,7 +41,6 @@ class COREHelpPageViewController: UIViewController, WKNavigationDelegate {
 		webView.navigationDelegate = self
 		
 		view.addSubview(webView)
-		
 	}
 	
 	required init?(coder: NSCoder) {

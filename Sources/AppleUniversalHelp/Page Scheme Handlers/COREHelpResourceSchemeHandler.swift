@@ -8,6 +8,8 @@
 import WebKit
 
 class COREHelpResourceSchemeHandler: NSObject, WKURLSchemeHandler {
+	var baseURL:URL? = nil
+	
 	func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
 		
 		if urlSchemeTask.request.url?.host == "appicon" {
@@ -19,6 +21,23 @@ class COREHelpResourceSchemeHandler: NSObject, WKURLSchemeHandler {
 			
 			urlSchemeTask.didReceive(data)
 			urlSchemeTask.didFinish()
+		}
+		else if urlSchemeTask.request.url?.scheme == "helpbundle" {
+			if let nsPath = urlSchemeTask.request.url?.absoluteString as? NSString {
+			
+				if let url = baseURL?.appendingPathComponent(nsPath.replacingOccurrences(of: "helpbundle://", with: "")) {
+					
+					do {
+						let data = try Data(contentsOf: url)
+						urlSchemeTask.didReceive(URLResponse(url: url, mimeType: nil, expectedContentLength: data.count, textEncodingName: nil))
+						urlSchemeTask.didReceive(data)
+						urlSchemeTask.didFinish()
+					}
+					catch {
+						
+					}
+				}
+			}
 		}
 		else {
 			let url = Bundle.main.url(forResource: "styles", withExtension: "css")!
