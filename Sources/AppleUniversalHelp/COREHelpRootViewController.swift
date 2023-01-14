@@ -207,7 +207,7 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 		let backCommand = UIKeyCommand(input: "[", modifierFlags: .command, action: NSSelectorFromString("goBack:"))
 		let forwardCommand = UIKeyCommand(input: "]", modifierFlags: .command, action: NSSelectorFromString("goForward:"))
 		let searchCommand = UIKeyCommand(input: "f", modifierFlags: .command, action: NSSelectorFromString("focusSearch:"))
-		if #available(macCatalyst 15.0, *) {
+		if #available(iOS 15.0, *) {
 			searchCommand.wantsPriorityOverSystemBehavior = true
 		}
 		
