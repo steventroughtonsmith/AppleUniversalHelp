@@ -59,21 +59,21 @@ public class HelpSection: HelpItem {
 		
 		var _pages:[HelpPage] = []
 		
-		do {
-			let nspath = url.path as NSString
-			let contents = try FileManager.default.contentsOfDirectory(atPath: nspath as String)
-			for item in contents {
-				if !item.hasSuffix("html") {
-					continue
-				}
-				
-				let pagePath = nspath.appendingPathComponent(item)
-				
+		let nspath = url.path as NSString
+		
+		let data = try! Data(contentsOf: url.appendingPathComponent("index.json"))
+		let indices = try! JSONDecoder().decode([String].self, from: data)
+
+		for item in indices {
+			
+			let pagePath = nspath.appendingPathComponent(item)
+			
+			if FileManager.default.fileExists(atPath: pagePath) {
 				_pages.append(HelpPage(url:URL(fileURLWithPath: pagePath)))
 			}
-		}
-		catch {
-			
+			else {
+				NSLog("[HELP] Missing page \(pagePath)")
+			}
 		}
 		
 		title = url.lastPathComponent
@@ -101,7 +101,12 @@ public struct HelpBundle {
 			let itemPath = nspath.appendingPathComponent(item)
 
 			if item.hasSuffix("html") {
-				_rootItems.append(HelpPage(url:URL(fileURLWithPath: itemPath)))
+				if FileManager.default.fileExists(atPath: itemPath) {
+					_rootItems.append(HelpPage(url:URL(fileURLWithPath: itemPath)))
+				}
+				else {
+					NSLog("[HELP] Missing item \(itemPath)")
+				}
 			}
 			else {
 				var isDirectory = ObjCBool(booleanLiteral: false)
