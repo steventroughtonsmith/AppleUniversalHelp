@@ -11,7 +11,7 @@ import AppleUniversalCore
 open class COREHelpWindowSceneDelegate: UIResponder, UIWindowSceneDelegate {
 	public var window: UIWindow?
 
-	public let helpRootController = COREHelpRootViewController()
+	public let helpRootController = COREHelpRootViewController(isStandalone: true)
 	
 	open func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
 		guard let scene = scene as? UIWindowScene else { return }
@@ -21,7 +21,7 @@ open class COREHelpWindowSceneDelegate: UIResponder, UIWindowSceneDelegate {
 		guard let window = window else { return }
 		
 		helpRootController.helpBundle = HelpBundle(url:Bundle.main.url(forResource: "Help", withExtension: "help")!)
-		
+
 		window.tintColor = .systemPurple
 		
 #if targetEnvironment(macCatalyst)

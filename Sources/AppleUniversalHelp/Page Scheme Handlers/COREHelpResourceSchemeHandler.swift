@@ -7,8 +7,14 @@
 
 import WebKit
 
+public class COREHelpStyles {
+	public static var styleSheetFileName = "styles"
+
+}
+
 class COREHelpResourceSchemeHandler: NSObject, WKURLSchemeHandler {
 	var baseURL:URL? = nil
+	
 	
 	func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
 		
@@ -40,7 +46,8 @@ class COREHelpResourceSchemeHandler: NSObject, WKURLSchemeHandler {
 			}
 		}
 		else {
-			let url = Bundle.main.url(forResource: "styles", withExtension: "css")!
+			
+			let url = Bundle.main.url(forResource: COREHelpStyles.styleSheetFileName, withExtension: "css")!
 			do {
 				let data = try Data(contentsOf: url)
 				urlSchemeTask.didReceive(URLResponse(url: url, mimeType: "text/html", expectedContentLength: data.count, textEncodingName: nil))

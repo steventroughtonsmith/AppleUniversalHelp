@@ -13,6 +13,37 @@ extension NSNotification.Name {
 	static let viewerDestinationChanged = NSNotification.Name("viewerDestinationChanged")
 }
 
+class COREHelpSearchContainerController : UIViewController {
+	
+	let effectView = UIVisualEffectView(effect: UIBlurEffect(style: .prominent))
+	
+	init() {
+		super.init(nibName: nil, bundle: nil)
+			
+		#if os(visionOS)
+		view.addSubview(effectView)
+		#endif
+	}
+	
+	required init?(coder: NSCoder) {
+		fatalError("init(coder:) has not been implemented")
+	}
+	
+	// MARK: -
+	
+	override func viewDidLayoutSubviews() {
+		super.viewDidLayoutSubviews()
+		
+		#if os(visionOS)
+		effectView.frame = view.bounds
+		#endif
+		
+		children.forEach { vc in
+			vc.view.frame = view.bounds
+		}
+	}
+}
+
 open class COREHelpRootViewController: UIViewController, UINavigationControllerDelegate {
 	
 	let rootSplitViewController = UISplitViewController(style: .doubleColumn)
@@ -26,6 +57,7 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	let splitPageViewController = COREHelpPageViewController()
 	let splitSearchViewController = COREHelpSearchViewController()
 	
+	
 	// MARK: - Toolbar Items
 	
 	var sidebarItem:UIBarButtonItem!
@@ -33,6 +65,11 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	var forwardItem:UIBarButtonItem!
 	
 	// MARK: -
+	
+	var shouldShowDoneButton = true
+	
+	// MARK: -
+
 	
 	public var helpBundle:HelpBundle? {
 		didSet {
@@ -56,13 +93,26 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 						compactRootNavigationController.present(nc, animated: true)
 					}
 					else {
-						let nc = UINavigationController(rootViewController: splitSearchViewController)
-						nc.view.tintColor = .systemPurple
-						nc.modalPresentationStyle = .overCurrentContext
 						
+					
+						
+						let nc = UINavigationController(rootViewController: splitSearchViewController)
+				
+						
+						nc.view.tintColor = .systemPurple
+
 						nc.isNavigationBarHidden = (UIDevice.current.userInterfaceIdiom == .mac)
 						
-						splitPageViewController.present(nc, animated: UIDevice.current.userInterfaceIdiom == .mac ? false : true)
+						nc.view.backgroundColor = .clear
+						nc.view.isOpaque = true
+						
+						let searchContainerController = COREHelpSearchContainerController()
+
+						searchContainerController.addChild(nc)
+						searchContainerController.view.addSubview(nc.view)
+						searchContainerController.modalPresentationStyle = .overCurrentContext
+
+						splitPageViewController.present(searchContainerController, animated: UIDevice.current.userInterfaceIdiom == .mac ? false : true)
 						view.window?.windowScene?.title = NSLocalizedString("SEARCH_RESULTS", comment: "")
 					}
 				}
@@ -88,8 +138,12 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 	
 	// MARK: -
 	
-	public init() {
+	public init(isStandalone:Bool = false) {
 		super.init(nibName: nil, bundle: nil)
+		
+		if isStandalone {
+			shouldShowDoneButton = false
+		}
 		
 		sidebarItem = UIBarButtonItem(image:UIImage(systemName: "sidebar.leading"), style:.plain, target: self, action: #selector(popToTableOfContents(_:)))
 		backItem = UIBarButtonItem(image:UIImage(systemName: "chevron.backward"), style:.plain, target: self, action: #selector(goBack(_:)))
@@ -178,7 +232,9 @@ open class COREHelpRootViewController: UIViewController, UINavigationControllerD
 			viewController.toolbarItems = []
 		}
 		
-		viewController.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismiss(_:)))
+		if shouldShowDoneButton {
+			viewController.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismiss(_:)))
+		}
 	}
 	
 	public func navigate(to page:HelpPage?) {

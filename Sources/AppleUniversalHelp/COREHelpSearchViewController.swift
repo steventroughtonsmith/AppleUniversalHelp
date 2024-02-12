@@ -1,6 +1,6 @@
 //
 //  COREHelpSearchViewController.swift
-//  
+//
 //
 //  Created by Steven Troughton-Smith on 05/01/2023.
 //
@@ -71,7 +71,6 @@ class COREHelpSearchViewController: UICollectionViewController {
 		
 		super.init(collectionViewLayout: layout)
 		
-		
 		title = NSLocalizedString("SEARCH_RESULTS", comment: "")
 		
 		if #available(iOS 15.0, *) {
@@ -79,7 +78,7 @@ class COREHelpSearchViewController: UICollectionViewController {
 		}
 		
 		navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(dismiss(_:)))
-				
+		
 		configureDataSource()
 		
 	}
@@ -128,7 +127,7 @@ class COREHelpSearchViewController: UICollectionViewController {
 		collectionView.dataSource = dataSource
 		
 	}
-		
+	
 	// MARK: -
 	
 	func actuateItem(at indexPath:IndexPath) {
@@ -175,7 +174,7 @@ class COREHelpSearchViewController: UICollectionViewController {
 		
 		items = []
 		for page in helpBundle.pagesMatchingSearchTerm(searchString) {
-						
+			
 			let item = SearchResultItem(page: page)
 			
 			items.append(item)
@@ -247,7 +246,7 @@ class COREHelpSearchViewController: UICollectionViewController {
 	}
 	
 	override func indexPathForPreferredFocusedView(in collectionView: UICollectionView) -> IndexPath? {
-
+		
 		return focusedIndexPath
 	}
 	
@@ -260,4 +259,10 @@ class COREHelpSearchViewController: UICollectionViewController {
 	@objc func dismiss(_ sender: Any?) {
 		presentingViewController?.dismiss(animated: true)
 	}
+	
+#if os(visionOS)
+	override var preferredContainerBackgroundStyle: UIContainerBackgroundStyle {
+		return .glass
+	}
+#endif
 }
